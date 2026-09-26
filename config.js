@@ -1,1 +1,4 @@
-window.APP_CONFIG = { supabaseUrl: 'https://YOUR_PROJECT.supabase.co', supabaseKey: 'YOUR_PUBLISHABLE_KEY' };
+window.APP_CONFIG = {
+  supabaseUrl: 'https://ifnncrmylmmaelfszhin.supabase.co',
+  supabaseKey: 'sb_publishable_9LseW6rml-v9f6_n9v58aw_A9r3Mhuq'
+};
