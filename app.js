@@ -1,59 +1,92 @@
-'use strict';
-const cfg=window.APP_CONFIG||{}, $=s=>document.querySelector(s), state={session:null,user:null,family:null,swimmers:[],swimmer:null,grants:[],members:[],lists:[],swims:[],goals:[],meets:[],meetEvents:[],tab:'home'};
-const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fmt=n=>{n=Number(n);return `${Math.floor(n/60)?Math.floor(n/60)+':':''}${(n%60).toFixed(2).padStart(Math.floor(n/60)?5:1,'0')}`};
-const parseTime=t=>{let s=String(t).trim().split(':');let n=s.length===2?Number(s[0])*60+Number(s[1]):Number(t);return Number.isFinite(n)&&n>0?n:null};
-const dateText=d=>d?new Date(d+'T12:00:00').toLocaleDateString():'';
-const notify=m=>{$('#notice').textContent=m;setTimeout(()=>{if($('#notice').textContent===m)$('#notice').textContent=''},6000)};
-const owner=()=>state.family?.owner_id===state.user?.id;
-const editable=()=>owner()||state.grants.some(g=>g.swimmer_id===state.swimmer?.id&&g.user_id===state.user?.id&&g.permission==='edit');
-function safeColor(c,fallback){return /^#[0-9a-f]{6}$/i.test(c||'')?c:fallback}
-function applyTheme(){let f=state.family;document.documentElement.style.setProperty('--primary',safeColor(f?.primary_color,'#075b78'));document.documentElement.style.setProperty('--accent',safeColor(state.swimmer?.accent_color||f?.accent_color,'#eb8b4b'));$('#familyName').textContent=f?.name||'Family Swim Tracker';$('#subtitle').textContent=state.swimmer?.name||'Your swim story, together';let mark=$('#logoBox');mark.replaceChildren();if(f?.logo_url&&/^https:\/\//.test(f.logo_url)){let img=document.createElement('img');img.alt='Family logo';img.src=f.logo_url;img.onerror=()=>mark.textContent='≈';mark.append(img)}else mark.textContent='≈'}
-async function request(path,{method='GET',body,token=state.session?.access_token,prefer}={}){if(!cfg.supabaseUrl||!cfg.supabaseKey||cfg.supabaseUrl.includes('YOUR_PROJECT'))throw Error('Set up config.js with a separate Supabase project first.');let r=await fetch(cfg.supabaseUrl.replace(/\/$/,'')+path,{method,headers:{apikey:cfg.supabaseKey,Authorization:'Bearer '+(token||cfg.supabaseKey),...(body?{'Content-Type':'application/json'}:{}),...(prefer?{Prefer:prefer}:{})},body:body?JSON.stringify(body):undefined});let raw=await r.text(),v=raw?JSON.parse(raw):null;if(!r.ok)throw Error(v?.message||v?.msg||v?.error_description||`Request failed (${r.status})`);return v}
-const q=(table,params='')=>request('/rest/v1/'+table+'?'+params);
-const insert=(table,data)=>request('/rest/v1/'+table,{method:'POST',body:data,prefer:'return=representation'});
-const update=(table,id,data)=>request('/rest/v1/'+table+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:data,prefer:'return=representation'});
-const remove=(table,id)=>request('/rest/v1/'+table+'?id=eq.'+encodeURIComponent(id),{method:'DELETE'});
-function saveSession(s){state.session=s;state.user=s?.user||null;if(s)localStorage.setItem('fst_session',JSON.stringify(s));else localStorage.removeItem('fst_session')}
-async function ensureSession(){let s=state.session;if(!s)return false;if(Date.now()/1000<(s.expires_at||0)-60)return true;try{let n=await request('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:s.refresh_token},token:cfg.supabaseKey});saveSession({...n,expires_at:Math.floor(Date.now()/1000)+n.expires_in});return true}catch{saveSession(null);return false}}
-async function authenticate(email,password,signup=false){let path=signup?'/auth/v1/signup':'/auth/v1/token?grant_type=password';let s=await request(path,{method:'POST',body:{email,password},token:cfg.supabaseKey});if(!s.access_token){$('#authMessage').textContent='Check your email to confirm the account, then sign in.';return}saveSession({...s,expires_at:Math.floor(Date.now()/1000)+s.expires_in});await boot()}
-$('#authForm').onsubmit=async e=>{e.preventDefault();let f=new FormData(e.target);try{await authenticate(f.get('email'),f.get('password'))}catch(err){$('#authMessage').textContent=err.message}};
-$('#signup').onclick=async()=>{let f=new FormData($('#authForm'));if(!f.get('email')||!f.get('password')){$('#authMessage').textContent='Enter an email and password first.';return}try{await authenticate(f.get('email'),f.get('password'),true)}catch(err){$('#authMessage').textContent=err.message}};
-$('#logout').onclick=async()=>{try{await request('/auth/v1/logout',{method:'POST'})}catch{}saveSession(null);state.family=null;state.swimmer=null;showAuth()};
-function showAuth(){ $('#auth').hidden=false;$('#app').hidden=true;$('#logout').hidden=true;$('#foot').hidden=true;$('#swimmerSelect').hidden=true;applyTheme() }
-function showApp(){ $('#auth').hidden=true;$('#app').hidden=false;$('#logout').hidden=false;$('#foot').hidden=false }
-async function loadRoot(){let f=await q('families','select=*&order=created_at.asc');let invites=await q('family_invites','select=*&email=eq.'+encodeURIComponent(state.user.email));if(invites.length){for(let invite of invites){try{await insert('family_members',{family_id:invite.family_id,user_id:state.user.id});await remove('family_invites',invite.id)}catch(e){notify('Invitation: '+e.message)}}f=await q('families','select=*&order=created_at.asc')}state.family=f[0]||null;state.swimmers=state.family?await q('swimmers','select=*&family_id=eq.'+state.family.id+'&order=created_at.asc'):[];state.members=state.family?await q('family_members','select=*&family_id=eq.'+state.family.id):[];state.grants=state.family?await q('access_grants','select=*'):[];state.lists=state.family?await q('family_lists','select=*&family_id=eq.'+state.family.id):[];let previous=state.swimmer?.id;state.swimmer=state.swimmers.find(s=>s.id===previous)||state.swimmers[0]||null;let select=$('#swimmerSelect');select.replaceChildren();for(let s of state.swimmers){let opt=document.createElement('option');opt.value=s.id;opt.textContent=s.name;select.append(opt)}select.hidden=!state.swimmers.length;select.value=state.swimmer?.id||'';applyTheme();await loadSwimmer()}
-async function loadSwimmer(){let sid=state.swimmer?.id;if(!sid){state.swims=[];state.goals=[];state.meets=[];state.meetEvents=[];render();return}let [swims,goals,meets]=await Promise.all([q('swims','select=*&swimmer_id=eq.'+sid+'&order=date.desc'),q('goals','select=*&swimmer_id=eq.'+sid),q('meets','select=*&swimmer_id=eq.'+sid+'&order=date.desc')]);state.swims=swims;state.goals=goals;state.meets=meets;state.meetEvents=meets.length?await q('meet_events','select=*&meet_id=in.('+meets.map(m=>m.id).join(',')+')'):[];render()}
-$('#swimmerSelect').onchange=async e=>{state.swimmer=state.swimmers.find(s=>s.id===e.target.value);applyTheme();await loadSwimmer()};
-async function boot(){if(!await ensureSession()){showAuth();return}showApp();try{await loadRoot()}catch(e){notify(e.message);render()}}
-const events=()=>state.lists.filter(x=>x.kind==='event').map(x=>x.value);
-const courses=()=>state.lists.filter(x=>x.kind==='course').map(x=>x.value);
-const places=()=>state.lists.filter(x=>x.kind==='place').map(x=>x.value);
-const optionList=(items,selected)=>items.map(x=>`<option ${x===selected?'selected':''}>${esc(x)}</option>`).join('');
-const bests=()=>{let out=new Map();for(let s of state.swims.filter(s=>s.official)){let k=s.event+'|'+s.course;if(!out.has(k)||Number(s.seconds)<Number(out.get(k).seconds))out.set(k,s)}return [...out.values()].sort((a,b)=>a.event.localeCompare(b.event))};
-function setTab(tab){state.tab=tab;render()}
-$('#tabs').onclick=e=>{let b=e.target.closest('button[data-tab]');if(b)setTab(b.dataset.tab)};
-function render(){let tab=state.tab;for(let b of $('#tabs').querySelectorAll('button'))b.classList.toggle('active',b.dataset.tab===tab);$('#tabs [data-tab=family]').hidden=!owner()&&!state.family;let v=$('#view');if(!state.family){v.innerHTML=`<div class="card"><h2>Welcome to the pool</h2><p>Create a family to begin, or ask the parent to invite your email address.</p><form id="createFamily"><label>Family name<input name="name" required placeholder="The Rivera Family"></label><button class="primary">Create family</button></form><p class="small">If you've been invited, sign out and back in after the invitation is created.</p></div>`;return}if(!state.swimmer&&tab!=='family'){v.innerHTML=`<div class="card empty">${owner()?'Add your first swimmer on the Family tab.':'Your account has no swimmer access yet. Ask the parent to assign a profile.'}</div>`;return}v.innerHTML=({home:homeView,results:resultsView,progress:progressView,goals:goalsView,meets:meetsView,family:familyView}[tab]||homeView)();if(tab==='progress')drawChart()}
-function homeView(){let pbs=bests(),recent=state.swims.slice(0,4),upcoming=state.meets.filter(m=>m.date>=new Date().toISOString().slice(0,10));return `<div class="card hero"><div class="eyebrow">${esc(state.swimmer.team||'Swimmer profile')}</div><h1>${esc(state.swimmer.name)}</h1><p>Every practice and meet moves the story forward.</p>${editable()?'<button class="primary" data-action="newSwim">Add a result</button>':''}</div><div class="grid"><div class="card"><div class="eyebrow">Recorded swims</div><div class="metric">${state.swims.length}</div></div><div class="card"><div class="eyebrow">Personal bests</div><div class="metric">${pbs.length}</div></div><div class="card"><div class="eyebrow">Upcoming meets</div><div class="metric">${upcoming.length}</div></div></div><div class="grid"><div class="card"><div class="row between"><h2>Recent swims</h2><button data-tab="results">All results</button></div>${recent.map(s=>swimItem(s)).join('')||'<div class="empty">No results yet.</div>'}</div><div class="card"><h2>Goals</h2>${state.goals.slice(0,4).map(g=>goalItem(g)).join('')||'<div class="empty">Goals will appear here.</div>'}</div><div class="card"><h2>Next meet</h2>${upcoming.length?`<strong>${esc(upcoming.at(-1).name)}</strong><p>${dateText(upcoming.at(-1).date)} · ${esc(upcoming.at(-1).place)}</p>`:'<div class="empty">No upcoming meets yet.</div>'}</div></div>`}
-function swimItem(s){return `<div class="item"><div><strong>${esc(s.event)}</strong><small>${dateText(s.date)} · ${esc(s.course)}${s.place?' · '+esc(s.place):''} · ${s.official?'Official':'Unofficial'}</small></div><div class="row"><strong>${fmt(s.seconds)}</strong>${editable()?`<button data-action="editSwim" data-id="${s.id}">Edit</button>`:''}</div></div>`}
-function swimForm(s={}){return `<form id="swimForm" data-id="${s.id||''}" class="card formgrid"><h2 class="wide">${s.id?'Edit':'Add'} result</h2><label>Event<input name="event" list="eventOptions" required value="${esc(s.event||'')}"><datalist id="eventOptions">${events().map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label><label>Course<select name="course">${optionList([...new Set([...courses(),'SCY','LCM','SCM'])],s.course||'SCY')}</select></label><label>Date<input type="date" name="date" required value="${s.date||new Date().toISOString().slice(0,10)}"></label><label>Time (seconds or m:ss.ss)<input name="time" required value="${s.seconds?fmt(s.seconds):''}" inputmode="decimal"></label><label>Place<input name="place" list="placeOptions" value="${esc(s.place||'')}"><datalist id="placeOptions">${places().map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label><label>Status<select name="official"><option value="true" ${s.official!==false?'selected':''}>Official</option><option value="false" ${s.official===false?'selected':''}>Unofficial</option></select></label><label>Splits (comma separated)<input name="splits" value="${esc(s.splits||'')}"></label><label>Notes<input name="notes" value="${esc(s.notes||'')}"></label><div class="wide row"><button class="primary">Save result</button><button type="button" data-action="cancel">Cancel</button>${s.id?`<button type="button" class="danger" data-action="deleteSwim" data-id="${s.id}">Delete</button>`:''}</div></form>`}
-function resultsView(){return `${editable()?'<button class="primary" data-action="newSwim">+ Add result</button>':''}<div id="editor"></div><div class="card"><div class="row between"><h2>Swim results</h2><span class="pill">${state.swims.length} entries</span></div><div class="list">${state.swims.map(swimItem).join('')||'<div class="empty">Add a result to get started.</div>'}</div></div>`}
-function progressView(){let pbs=bests();return `<div class="card"><div class="row between"><h2>Progress</h2><button data-action="print">Print summary</button></div><label>Event and course<select id="progressEvent">${[...new Set(state.swims.map(x=>x.event+'|'+x.course))].map(k=>`<option value="${esc(k)}">${esc(k.replace('|',' · '))}</option>`).join('')}</select></label><svg id="chart" class="chart" viewBox="0 0 600 235" role="img" aria-label="Swim time progress chart"></svg></div><div class="card"><h2>Personal bests</h2>${pbs.map(s=>swimItem(s)).join('')||'<div class="empty">Official results generate personal bests.</div>'}</div>`}
-function drawChart(){let svg=$('#chart'),key=$('#progressEvent')?.value;if(!svg)return;let data=state.swims.filter(s=>s.official&&s.event+'|'+s.course===key).slice().reverse();if(!data.length){svg.innerHTML='<text x="20" y="115" fill="#617984">Select an event with official results.</text>';return}let nums=data.map(x=>Number(x.seconds)),lo=Math.min(...nums)-1,hi=Math.max(...nums)+1,range=hi-lo||1,pts=data.map((s,i)=>[35+i*530/Math.max(1,data.length-1),195-(Number(s.seconds)-lo)/range*150]);svg.innerHTML=`<line x1="35" y1="195" x2="565" y2="195" stroke="#bdd0d6"/><line x1="35" y1="45" x2="35" y2="195" stroke="#bdd0d6"/><polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--primary)" stroke-width="3"/>${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="var(--accent)"><title>${esc(data[i].date)}: ${fmt(data[i].seconds)}</title></circle>`).join('')}<text x="35" y="225" fill="#617984" font-size="12">${esc(dateText(data[0].date))}</text><text x="460" y="225" fill="#617984" font-size="12">${esc(dateText(data.at(-1).date))}</text>`}
-function goalItem(g){let pb=bests().find(s=>s.event===g.event&&s.course===g.course),target=Number(g.personal||0),reached=pb&&target&&Number(pb.seconds)<=target;return `<div class="item"><div><strong>${esc(g.event)} · ${esc(g.course)}</strong><small>Personal ${g.personal?fmt(g.personal):'—'} · B ${g.b?fmt(g.b):'—'} · BB ${g.bb?fmt(g.bb):'—'} · A ${g.a?fmt(g.a):'—'} · AA ${g.aa?fmt(g.aa):'—'}</small>${pb&&target?`<small>${reached?'Goal reached':'Current PB '+fmt(pb.seconds)+' · '+fmt(pb.seconds-target)+' to go'}</small>`:''}</div>${editable()?`<button data-action="editGoal" data-id="${g.id}">Edit</button>`:''}</div>`}
-function goalForm(g={}){return `<form id="goalForm" data-id="${g.id||''}" class="card formgrid"><h2 class="wide">${g.id?'Edit':'Set'} goal</h2><label>Event<input name="event" list="goalEvents" required value="${esc(g.event||'')}"><datalist id="goalEvents">${events().map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label><label>Course<select name="course">${optionList([...new Set([...courses(),'SCY','LCM','SCM'])],g.course||'SCY')}</select></label>${['personal','b','bb','a','aa'].map(k=>`<label>${k==='personal'?'Personal':k.toUpperCase()} time<input name="${k}" value="${g[k]?fmt(g[k]):''}" placeholder="Optional"></label>`).join('')}<div class="wide row"><button class="primary">Save goal</button><button type="button" data-action="cancel">Cancel</button>${g.id?`<button type="button" class="danger" data-action="deleteGoal" data-id="${g.id}">Delete</button>`:''}</div></form>`}
-function goalsView(){return `${editable()?'<button class="primary" data-action="newGoal">+ Set goal</button>':''}<div id="editor"></div><div class="card"><h2>Goals and time standards</h2>${state.goals.map(goalItem).join('')||'<div class="empty">Set a personal goal or add time standards.</div>'}</div>`}
-function meetItem(m){let es=state.meetEvents.filter(x=>x.meet_id===m.id);return `<div class="card"><div class="row between"><div><span class="eyebrow">${dateText(m.date)}</span><h2>${esc(m.name)}</h2><p>${esc(m.place)} ${m.notes?'· '+esc(m.notes):''}</p></div>${editable()?`<button data-action="addMeetEvent" data-id="${m.id}">Add event</button>`:''}</div>${es.map(x=>{let s=state.swims.find(s=>s.id===x.swim_id);return `<div class="item"><div><strong>${esc(x.event)} · ${esc(x.course)}</strong><small>Target ${x.target?fmt(x.target):'—'} · Result ${s?fmt(s.seconds):'Pending'}</small></div>${editable()?`<button data-action="meetResult" data-id="${x.id}">${s?'Change':'Enter'} result</button>`:''}</div>`}).join('')||'<p>No events scheduled.</p>'}</div>`}
-function meetsView(){return `${editable()?'<button class="primary" data-action="newMeet">+ Add meet</button>':''}<div id="editor"></div>${state.meets.map(meetItem).join('')||'<div class="card empty">Plan a meet, then add events and results.</div>'}`}
-function familyView(){if(!owner())return `<div class="card"><h2>Family access</h2><p>Your access to ${esc(state.swimmer?.name||'this swimmer')} is ${editable()?'editing':'view only'}. The parent can change it later.</p></div>`;let f=state.family;return `<div class="grid"><div class="card"><h2>Swimmers</h2>${state.swimmers.map(s=>`<div class="item"><div><strong>${esc(s.name)}</strong><small>${esc(s.team)}</small></div><button data-action="editSwimmer" data-id="${s.id}">Edit</button></div>`).join('')}<div id="swimmerEditor"></div><button data-action="newSwimmer">+ Add swimmer</button></div><div class="card"><h2>Family branding</h2><form id="familyForm" class="formgrid"><label class="wide">Family name<input name="name" value="${esc(f.name)}" required></label><label>Primary color<input name="primary_color" type="color" value="${safeColor(f.primary_color,'#075b78')}"></label><label>Accent color<input name="accent_color" type="color" value="${safeColor(f.accent_color,'#eb8b4b')}"></label><label class="wide">Logo image URL<input name="logo_url" type="url" placeholder="https://..." value="${esc(f.logo_url||'')}"></label><button class="primary wide">Save appearance</button></form></div><div class="card"><h2>Family members</h2><p>Ask each person to create their own account. Invite their email, then assign access after they sign in.</p><form id="inviteForm" class="row"><input name="email" type="email" placeholder="Email to invite" required><button class="primary">Invite</button></form>${state.members.map(m=>`<div class="item"><small>Member ${esc(m.user_id.slice(0,8))}</small>${state.swimmers.map(s=>{let g=state.grants.find(g=>g.user_id===m.user_id&&g.swimmer_id===s.id);return `<label>${esc(s.name)}<select data-grant-user="${m.user_id}" data-grant-swimmer="${s.id}"><option value="none" ${!g?'selected':''}>No access</option><option value="view" ${g?.permission==='view'?'selected':''}>View only</option><option value="edit" ${g?.permission==='edit'?'selected':''}>Can edit</option></select></label>`}).join('')}</div>`).join('')||'<div class="empty">No members have joined yet.</div>'}</div></div><div class="card"><h2>Custom lists and data</h2><div class="row">${['event','course','place'].map(k=>`<button data-action="addList" data-kind="${k}">Add ${k}</button>`).join('')}<button data-action="export">Export JSON</button></div>${state.lists.map(x=>`<span class="pill">${esc(x.kind)}: ${esc(x.value)}</span> `).join('')}</div>`}
-function swimmerForm(s={}){return `<form id="swimmerForm" data-id="${s.id||''}" class="formgrid"><label>Name<input name="name" required value="${esc(s.name||'')}"></label><label>Team<input name="team" value="${esc(s.team||'')}"></label><label>Personal accent<input name="accent_color" type="color" value="${safeColor(s.accent_color,'#eb8b4b')}"></label><div class="wide row"><button class="primary">Save swimmer</button><button type="button" data-action="cancel">Cancel</button></div></form>`}
-function formData(form){return Object.fromEntries(new FormData(form))}
-async function write(table,id,data){return id?update(table,id,data):insert(table,data)}
-async function saveSwim(form){let d=formData(form),seconds=parseTime(d.time);if(!seconds)throw Error('Enter a valid time.');let data={swimmer_id:state.swimmer.id,event:d.event.trim(),course:d.course,date:d.date,seconds,place:d.place.trim(),official:d.official==='true',splits:d.splits.trim(),notes:d.notes.trim(),updated_at:new Date().toISOString()};await write('swims',form.dataset.id,data);await loadSwimmer();setTab('results')}
-async function saveGoal(form){let d=formData(form),data={swimmer_id:state.swimmer.id,event:d.event.trim(),course:d.course};for(let k of ['personal','b','bb','a','aa']){data[k]=d[k].trim()?parseTime(d[k]):null;if(d[k].trim()&&!data[k])throw Error('Enter a valid '+k+' time.')}await write('goals',form.dataset.id,data);await loadSwimmer();setTab('goals')}
-async function saveMeet(form){let d=formData(form);await insert('meets',{swimmer_id:state.swimmer.id,name:d.name.trim(),date:d.date,place:d.place.trim(),notes:d.notes.trim()});await loadSwimmer();setTab('meets')}
-async function handleAction(b){let a=b.dataset.action,id=b.dataset.id,ed=$('#editor');if(['newSwim','editSwim','newGoal','editGoal','newMeet'].includes(a)&&!ed){setTab(a.includes('Swim')?'results':a.includes('Goal')?'goals':'meets');ed=$('#editor')}if(a==='cancel'){render();return}if(a==='newSwim'||a==='editSwim'){ed.innerHTML=swimForm(state.swims.find(s=>s.id===id));ed.scrollIntoView({behavior:'smooth'});return}if(a==='newGoal'||a==='editGoal'){ed.innerHTML=goalForm(state.goals.find(g=>g.id===id));ed.scrollIntoView({behavior:'smooth'});return}if(a==='newMeet'){ed.innerHTML=`<form id="meetForm" class="card formgrid"><h2 class="wide">Plan a meet</h2><label>Name<input name="name" required></label><label>Date<input name="date" type="date" required></label><label>Place<input name="place"></label><label>Notes<input name="notes"></label><button class="primary">Save meet</button></form>`;return}if(a==='newSwimmer'||a==='editSwimmer'){$('#swimmerEditor').innerHTML=swimmerForm(state.swimmers.find(s=>s.id===id));return}if(a==='deleteSwim'||a==='deleteGoal'){if(confirm('Delete this '+(a==='deleteSwim'?'result':'goal')+'?')){await remove(a==='deleteSwim'?'swims':'goals',id);await loadSwimmer()}return}if(a==='print'){window.print();return}if(a==='export'){let payload={family:{name:state.family.name},swimmers:state.swimmers,swims:state.swims,goals:state.goals,meets:state.meets,meetEvents:state.meetEvents};let u=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'})),link=document.createElement('a');link.href=u;link.download='family-swim-data.json';link.click();setTimeout(()=>URL.revokeObjectURL(u),1000);return}if(a==='addList'){let value=prompt('Add '+b.dataset.kind);if(value?.trim()){await insert('family_lists',{family_id:state.family.id,kind:b.dataset.kind,value:value.trim()});await loadRoot()}return}if(a==='addMeetEvent'){let event=prompt('Event (for example, 100 Freestyle)');if(!event?.trim())return;let course=prompt('Course: SCY, LCM, or SCM','SCY')||'SCY',time=prompt('Target time (optional)');await insert('meet_events',{meet_id:id,event:event.trim(),course:course.trim(),target:time?.trim()?parseTime(time):null});await loadSwimmer();return}if(a==='meetResult'){let x=state.meetEvents.find(x=>x.id===id),meet=state.meets.find(m=>m.id===x.meet_id),time=prompt('Result time in seconds or m:ss.ss');if(!time)return;let seconds=parseTime(time);if(!seconds)throw Error('Invalid time.');let swim={swimmer_id:state.swimmer.id,event:x.event,course:x.course,date:meet.date,place:meet.place,seconds,official:true};let result=await write('swims',x.swim_id,swim);await update('meet_events',id,{swim_id:result[0].id});await loadSwimmer()}}
-$('#app').onclick=async e=>{let tab=e.target.closest('[data-tab]');if(tab){setTab(tab.dataset.tab);return}let b=e.target.closest('[data-action]');if(!b)return;try{await handleAction(b)}catch(err){notify(err.message)}};
-$('#app').onchange=async e=>{if(e.target.id==='progressEvent'){drawChart();return}let el=e.target;if(!el.dataset.grantUser)return;try{let g=state.grants.find(x=>x.user_id===el.dataset.grantUser&&x.swimmer_id===el.dataset.grantSwimmer),permission=el.value;if(permission==='none'){if(g)await request('/rest/v1/access_grants?swimmer_id=eq.'+el.dataset.grantSwimmer+'&user_id=eq.'+el.dataset.grantUser,{method:'DELETE'})}else if(g)await request('/rest/v1/access_grants?swimmer_id=eq.'+el.dataset.grantSwimmer+'&user_id=eq.'+el.dataset.grantUser,{method:'PATCH',body:{permission}});else await insert('access_grants',{swimmer_id:el.dataset.grantSwimmer,user_id:el.dataset.grantUser,permission});await loadRoot();notify('Access updated')}catch(err){notify(err.message)}};
-$('#app').onsubmit=async e=>{e.preventDefault();let f=e.target,d=formData(f);try{if(f.id==='createFamily'){await insert('families',{name:d.name.trim(),owner_id:state.user.id});await loadRoot();setTab('family')}if(f.id==='swimForm')await saveSwim(f);if(f.id==='goalForm')await saveGoal(f);if(f.id==='meetForm')await saveMeet(f);if(f.id==='swimmerForm'){await write('swimmers',f.dataset.id,{family_id:state.family.id,name:d.name.trim(),team:d.team.trim(),accent_color:d.accent_color});await loadRoot()}if(f.id==='familyForm'){if(d.logo_url&&!/^https:\/\//.test(d.logo_url))throw Error('Logo must use an HTTPS URL.');await update('families',state.family.id,{name:d.name.trim(),primary_color:d.primary_color,accent_color:d.accent_color,logo_url:d.logo_url||null});await loadRoot()}if(f.id==='inviteForm'){await insert('family_invites',{family_id:state.family.id,email:d.email.trim().toLowerCase()});f.reset();notify('Invitation saved. Ask them to sign in.')} }catch(err){notify(err.message)}};
-try{saveSession(JSON.parse(localStorage.getItem('fst_session')||'null'))}catch{saveSession(null)}boot();
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Initialize Supabase Client using variables from config.js
+  const supabaseUrl = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '';
+  const supabaseAnonKey = typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KEY : '';
+
+  if (!supabaseUrl || !supabaseAnonKey || !window.supabase) {
+    console.error('Supabase initialization failed: Missing URL/Key or Supabase JS SDK.');
+    const errorDiv = document.getElementById('login-error');
+    if (errorDiv) {
+      errorDiv.textContent = 'Configuration error: Supabase client failed to load.';
+    }
+    return;
+  }
+
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+  // 2. DOM Elements
+  const loginForm = document.getElementById('login-form');
+  const loginEmail = document.getElementById('login-email');
+  const loginPassword = document.getElementById('login-password');
+  const loginBtn = document.getElementById('login-btn');
+  const loginError = document.getElementById('login-error');
+
+  const authSection = document.getElementById('auth-section');
+  const mainAppSection = document.getElementById('main-app-section');
+  const signoutBtn = document.getElementById('signout-btn');
+
+  // 3. Check for existing active session on page load
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+      showDashboard(session.user);
+    }
+  });
+
+  // 4. Form Submission & Authentication Handling
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Stop default HTML form submission/page reload
+
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value;
+
+      if (!email || !password) {
+        loginError.textContent = 'Please enter both email and password.';
+        return;
+      }
+
+      // Provide immediate UI feedback
+      loginBtn.disabled = true;
+      loginError.style.color = '#333';
+      loginError.textContent = 'Signing in...';
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+
+        if (error) {
+          loginError.style.color = '#d9534f'; // Red error alert
+          loginError.textContent = error.message;
+          console.error('Sign-in error:', error.message);
+        } else {
+          loginError.textContent = '';
+          showDashboard(data.user);
+        }
+      } catch (err) {
+        loginError.style.color = '#d9534f';
+        loginError.textContent = 'An unexpected error occurred. Please check browser console.';
+        console.error('Unexpected sign-in error:', err);
+      } finally {
+        loginBtn.disabled = false;
+      }
+    });
+  }
+
+  // 5. Sign Out
+  if (signoutBtn) {
+    signoutBtn.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      if (mainAppSection) mainAppSection.style.display = 'none';
+      if (authSection) authSection.style.display = 'block';
+      if (loginError) loginError.textContent = '';
+      if (loginForm) loginForm.reset();
+    });
+  }
+
+  function showDashboard(user) {
+    if (authSection) authSection.style.display = 'none';
+    if (mainAppSection) mainAppSection.style.display = 'block';
+  }
+});
