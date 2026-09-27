@@ -22,3 +22,7 @@ Cheer Squad public links, data restore/import, and detailed split analysis from 
 ## Updating the existing site
 
 Replace the files in the GitHub repository root and commit. GitHub Pages will publish them. `schema.sql` documents a fresh database setup; do not rerun it against the existing Supabase project. The family and swimmer SELECT policies have already been updated in the existing project. After deployment, reload the page with Ctrl+Shift+R.
+
+## Version
+
+The version is shown in the header on sign-in and app screens. This build is **v1.0.1**. For each future release, update the visible version and the `?v=` values on the CSS and script tags in `index.html` so browsers fetch the current files.
