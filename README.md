@@ -15,9 +15,9 @@ The parent owns a family and is an administrator. Members sign up independently,
 
 ## Current implementation
 
-Swimmer profiles and switching; official/unofficial results; personal bests; progress by event and course; personal and B/BB/A/AA goals; meets and meet result entry; custom events/courses/places; theme colors and logo URL; printable summary; JSON export; separate sign-ins and per-swimmer permissions. Data syncs through the new Supabase project.
+Swimmer profiles and switching; official/unofficial results; personal bests; progress by event and course; personal and B/BB/A/AA goals; meets and meet result entry; custom events/courses/places; theme colors and family picture upload or logo URL; printable summary; JSON export; separate sign-ins and per-swimmer permissions. Data syncs through the new Supabase project.
 
-Cheer Squad public links, data restore/import, and detailed split analysis from the original tracker are not implemented in this first build. Videos and badges are intentionally excluded. The site is hosted on GitHub Pages at https://sfisher1975.github.io/Swim_With_Me/. A logo URL should point to an image you have permission to use; a private upload workflow can be added later.
+Cheer Squad public links, data restore/import, and detailed split analysis from the original tracker are not implemented in this first build. Videos and badges are intentionally excluded. The site is hosted on GitHub Pages at https://sfisher1975.github.io/Swim_With_Me/. Family pictures selected from a JPG, PNG, or WebP file are resized and stored with the family record. Only family members can load them. A logo URL may still point to a public image you have permission to use.
 
 ## Updating the existing site
 
