@@ -26,3 +26,13 @@ Replace the files in the GitHub repository root and commit. GitHub Pages will pu
 ## Version
 
 The version is shown in the header on sign-in and app screens. This build is **v1.0.1**. For each future release, update the visible version and the `?v=` values on the CSS and script tags in `index.html` so browsers fetch the current files.
+
+## v1.1.0 — My Swim
+
+Opens on My Swim (Kid view for editors): latest race reveal, previous-result comparison, personal goal feedback, upcoming meet/events, race replay, Ocean/Neon/Sunset styles, and downloadable PNG race cards. Comparisons match event, course, and official/unofficial status. Same-day races use last-updated timestamps; editing an older race can move it forward. Card styles are temporary session choices.
+
+Results refresh every 15 seconds while the kid screen is visible and signed in. Internet is required; this is not instant push. No database migration is needed.
+
+Replace app.js, index.html, and style.css in the existing repository. Keep config.js. Do not rerun schema.sql. This is a web build, not an APK. Family messages, replies, saved reactions, and child-editable profile customization remain future work.
+
+Validation: JavaScript syntax and drop/slower time, goal, course/status isolation, and empty-screen checks passed. Phone layout and PNG downloads require device testing; no browser executable was available in the build environment.
