@@ -36,3 +36,9 @@ Results refresh every 15 seconds while the kid screen is visible and signed in. 
 Replace app.js, index.html, and style.css in the existing repository. Keep config.js. Do not rerun schema.sql. This is a web build, not an APK. Family messages, replies, saved reactions, and child-editable profile customization remain future work.
 
 Validation: JavaScript syntax and drop/slower time, goal, course/status isolation, and empty-screen checks passed. Phone layout and PNG downloads require device testing; no browser executable was available in the build environment.
+
+## v1.2.0 — Animated result reveals
+
+Alien UFO (default) beams dropped seconds up or added seconds down while the old time counts to the new result. Ocean Buddy and Simple are alternate reveals. Replay and Skip controls are included. Choice is saved per swimmer on this browser/device. First swims and ties have separate messages. Reduced-motion settings show the completed result immediately. Automatic refresh does not replay an already-seen result in this session. Comparisons continue to match event, course and official status.
+
+Replace app.js, index.html and style.css; keep your config.js. No database changes. Not deployed or packaged as an Android APK. Syntax and drop/add/tie/first/course comparison checks passed. Animations and phone layout require browser/device testing.
