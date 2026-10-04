@@ -64,3 +64,17 @@ Replace app.js, index.html, style.css AND animations.js in the repository root. 
 ## v1.4.1 — Simpler heading
 
 Kid page heading shows only the swimmer’s first name. Removed Your lane/Your story tagline and manual Refresh results button. Automatic refresh remains; its failure notice no longer references the removed button. No database changes.
+
+## v1.4.2 — One bubble
+
+Entire kid page lives in one race bubble: name, Back to menu, reveal, goals, reactions and save button. Customize, My meet and My swims are collapsed sections inside the bubble. Removed outside heading/panels and routine refresh caption. All animations and automatic refresh remain. Replace app.js, index.html and style.css; keep animations.js and config.js. No database changes.
+
+## v1.4.3 — Bubble section order
+
+Make it yours is the final section at the bottom of the bubble, after My meet and My swims. No meet/history/customization panels outside the bubble.
+
+## v1.5.0 — Family race conversations
+
+Replaces reactions with a saved message thread and reply form inside each race bubble. Parents and family members with swimmer access can send; view-only members may message without editing swim data. Choose your display name when sending. Names are self-entered; each message remains tied to its authenticated sender. Latest 100 messages per race, displayed oldest first. Messages refresh with the existing 15-second polling. Drafts survive refresh within this session. No anonymous/public access.
+
+SETUP: Run messages_migration.sql once in your EXISTING Swim With Me Supabase SQL editor. Do not rerun schema.sql. Then replace app.js, index.html and style.css; keep config.js and animations.js. The app shows setup feedback if the messages table is missing. No migration has been applied by this build. Database RLS migration needs verification in your Supabase project with two authorized accounts and one unauthorized account. Web build only, not deployed/APK.
