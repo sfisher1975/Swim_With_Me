@@ -60,3 +60,7 @@ Kid view is one continuous column with no header or top tab menu. A temporary Ba
 Five collections (Space, Ocean, Animals, Fantasy, Machines), ten visitors each. Pick one visitor, Random within a collection, or Random from all 50. Replay keeps the current visitor; Surprise me again picks another. Preferences save per swimmer on this device. Distinct generated entrance/working/exit paths plus beam, bubble, splash, portal, flame and other transfer effects use lightweight emoji characters; artwork appearance depends on the device. Last time remains visible while signed green/red seconds transfer and the old time counts to the result. Ties/first swims are neutral. Reduced-motion setting bypasses animation. No sound/vibration or result-status labels. Reactions remain local; messaging is not implemented.
 
 Replace app.js, index.html, style.css AND animations.js in the repository root. Keep config.js; no database changes. This is a web build, not an APK and not deployed. Syntax and collection/fixed/random/replay/shuffle checks passed. Phone animation/layout/card-download testing remains required.
+
+## v1.4.1 — Simpler heading
+
+Kid page heading shows only the swimmer’s first name. Removed Your lane/Your story tagline and manual Refresh results button. Automatic refresh remains; its failure notice no longer references the removed button. No database changes.
