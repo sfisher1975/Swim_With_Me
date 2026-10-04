@@ -42,3 +42,7 @@ Validation: JavaScript syntax and drop/slower time, goal, course/status isolatio
 Alien UFO (default) beams dropped seconds up or added seconds down while the old time counts to the new result. Ocean Buddy and Simple are alternate reveals. Replay and Skip controls are included. Choice is saved per swimmer on this browser/device. First swims and ties have separate messages. Reduced-motion settings show the completed result immediately. Automatic refresh does not replay an already-seen result in this session. Comparisons continue to match event, course and official status.
 
 Replace app.js, index.html and style.css; keep your config.js. No database changes. Not deployed or packaged as an Android APK. Syntax and drop/add/tie/first/course comparison checks passed. Animations and phone layout require browser/device testing.
+
+## v1.2.1 — Active time transfer
+
+Last time remains visible throughout the reveal. Signed seconds are extracted or delivered while the main time counts to the new result, with an explicit old-time +/- change = new-time equation. UFO swoops in, beams, and exits. Optional synthesized swoosh/beam/finish sounds and vibration toggles are remembered on this device. Tap Sound on then Play reveal to enable audio; vibration depends on browser/device support. Skip stops effects. Reduced motion shows the final result without autoplay effects. No database migration. Syntax and previous/change/result markup checks passed; visual, audio and vibration device testing remains necessary.
