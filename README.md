@@ -84,3 +84,13 @@ SETUP: Run messages_migration.sql once in your EXISTING Swim With Me Supabase SQ
 Run messages_migration.sql if not already installed, then kid_accounts_migration.sql once. In the parent Family tab, choose Kid account for on the correct member. Linking assigns View only access to that swimmer. The child opens directly to their linked profile and kid page; temporary Back to menu is only shown in adult previews. Family cheers displays race messages; only linked kid accounts see Reply to your family, with the swimmer name supplied automatically and stamped server-side. Adult previews cannot send from the kid page. A separate family send screen is future work; no family composer is included in this build. Linking is optional until child login is set up. Existing family messages remain.
 
 Replace app.js, index.html and style.css; keep animations.js and config.js. Migration not applied by this package; signed-in permission and sync verification still needed. The migration restricts linked child accounts to their own swimmer and blocks edits to swim records through the existing permission functions. Existing grants stay stored for future access changes.
+
+## v1.5.2 — 12 kid color palettes
+
+Make it yours offers Splash Planet, Neon Purple, Sunset, Blue Lagoon, Bubblegum, Mint Magic, Galaxy, Coral Reef, Electric Blue, Golden Glow, Berry Blast and Tropical Teal. Choice styles the kid page background, bubble and saved PNG, and is remembered per swimmer on this device. Red adds/green drops stay consistent. No new database changes; keep earlier messaging/account migrations if installed. Replace app.js, style.css and index.html.
+
+## v1.6.0 — Meet management
+
+Add/edit/delete meets; event dropdown with built-in freestyle, backstroke, breaststroke, butterfly, IM and relay choices for SCY/SCM/LCM, plus family custom events and Other event. No manual list setup required. This built-in catalog was created for this app; it is not a verified extraction from the other app. Remove planned events without deleting their results. Delete meet confirmation offers Keep times or Delete linked times and shows a distinct-result count. Only explicitly linked swims are affected; manually entered unlinked swims are not inferred by date. Saved message threads cascade when linked swims are deleted. Downloaded race images remain.
+
+Run meets_migration.sql in the existing Supabase project to install transactional deletion. Do not rerun schema.sql. Replace app.js, index.html and style.css; keep config.js and animations.js. Includes all 12 color themes. Other migrations are only needed for their respective kid-account/messaging features. Database migration not applied here; live permission/transaction testing is required.
