@@ -50,3 +50,7 @@ Last time remains visible throughout the reveal. Signed seconds are extracted or
 ## v1.2.2 — Simplified reveal
 
 Dropped seconds, changing result and feedback are green; added seconds are red. Ties and first swims remain neutral. Previous time stays visible. Removed calculation line, sound/vibration controls and all audio/haptics code. Removed official/unofficial labels from the kid reveal and exported race card; parent data and comparison rules are unchanged. Replace app.js, index.html and style.css; keep config.js. No database changes.
+
+## v1.3.0 — Personal race card page
+
+Kid view is one continuous column with no header or top tab menu. A temporary Back to menu button returns to Overview and restores the parent navigation. Race card includes swimmer identity, result, previous time, green/red change, goals, and a selectable reaction. Reaction saves per swimmer/race in this browser only and is included in the PNG. Style options are collapsed under Make it yours. Family messaging/synced reactions remain future work. No database changes. Replace app.js, index.html and style.css; keep config.js. Syntax checked; phone layout and card export require device testing.
