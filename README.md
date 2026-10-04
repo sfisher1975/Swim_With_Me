@@ -54,3 +54,9 @@ Dropped seconds, changing result and feedback are green; added seconds are red. 
 ## v1.3.0 — Personal race card page
 
 Kid view is one continuous column with no header or top tab menu. A temporary Back to menu button returns to Overview and restores the parent navigation. Race card includes swimmer identity, result, previous time, green/red change, goals, and a selectable reaction. Reaction saves per swimmer/race in this browser only and is included in the PNG. Style options are collapsed under Make it yours. Family messaging/synced reactions remain future work. No database changes. Replace app.js, index.html and style.css; keep config.js. Syntax checked; phone layout and card export require device testing.
+
+## v1.4.0 — Splash Planet with 50 visitors
+
+Five collections (Space, Ocean, Animals, Fantasy, Machines), ten visitors each. Pick one visitor, Random within a collection, or Random from all 50. Replay keeps the current visitor; Surprise me again picks another. Preferences save per swimmer on this device. Distinct generated entrance/working/exit paths plus beam, bubble, splash, portal, flame and other transfer effects use lightweight emoji characters; artwork appearance depends on the device. Last time remains visible while signed green/red seconds transfer and the old time counts to the result. Ties/first swims are neutral. Reduced-motion setting bypasses animation. No sound/vibration or result-status labels. Reactions remain local; messaging is not implemented.
+
+Replace app.js, index.html, style.css AND animations.js in the repository root. Keep config.js; no database changes. This is a web build, not an APK and not deployed. Syntax and collection/fixed/random/replay/shuffle checks passed. Phone animation/layout/card-download testing remains required.
