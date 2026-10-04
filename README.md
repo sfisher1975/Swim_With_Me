@@ -46,3 +46,7 @@ Replace app.js, index.html and style.css; keep your config.js. No database chang
 ## v1.2.1 — Active time transfer
 
 Last time remains visible throughout the reveal. Signed seconds are extracted or delivered while the main time counts to the new result, with an explicit old-time +/- change = new-time equation. UFO swoops in, beams, and exits. Optional synthesized swoosh/beam/finish sounds and vibration toggles are remembered on this device. Tap Sound on then Play reveal to enable audio; vibration depends on browser/device support. Skip stops effects. Reduced motion shows the final result without autoplay effects. No database migration. Syntax and previous/change/result markup checks passed; visual, audio and vibration device testing remains necessary.
+
+## v1.2.2 — Simplified reveal
+
+Dropped seconds, changing result and feedback are green; added seconds are red. Ties and first swims remain neutral. Previous time stays visible. Removed calculation line, sound/vibration controls and all audio/haptics code. Removed official/unofficial labels from the kid reveal and exported race card; parent data and comparison rules are unchanged. Replace app.js, index.html and style.css; keep config.js. No database changes.
