@@ -98,3 +98,11 @@ Run meets_migration.sql in the existing Supabase project to install transactiona
 ## v1.7.0 — Meet-first kid bubble and history graph
 
 Kid screen opens to today's meet, otherwise nearest future meet, otherwise most recent past meet. All meets are available in the meet dropdown. Planned events appear even before results exist. Select a completed event for its animated race reveal, card and message thread; pending events show their race target and waiting state. History graph is collapsed under My progress immediately before Make it yours; event/course selector, dated race times, personal and B/BB/A/AA goal lines, clickable/keyboard point details. Goal values are included in chart range. Family conversations remain per recorded race and become available after result entry. Meet-first screen includes all 50 visitors and 12 palettes. No new database migration; existing feature migrations are unchanged. Replace app.js, index.html, style.css; keep config.js and animations.js.
+
+## v1.7.1 — Scroll to completed race
+
+Tapping a completed meet event scrolls to its race reveal and replays its visitor animation. Pending events keep the existing behavior. Reduced-motion preference disables smooth scrolling and animation. No database changes.
+
+## v1.7.2 — Meet selector placement
+
+My meet selector now sits below Family cheers and immediately above My progress. The selected meet title and events remain at the top of the bubble. No database changes.
