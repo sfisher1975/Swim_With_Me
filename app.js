@@ -1,5 +1,5 @@
 'use strict';
-const cfg=window.APP_CONFIG||{}, $=s=>document.querySelector(s), state={session:null,user:null,family:null,swimmers:[],swimmer:null,grants:[],members:[],lists:[],swims:[],goals:[],meets:[],meetEvents:[],kidLinks:[],kidDevices:[],pairingReady:false,kidLinkError:false,messages:[],messageError:'',messageRaceId:null,messageDrafts:{},messageSending:false,tab:'kid'};
+const cfg=window.APP_CONFIG||{}, $=s=>document.querySelector(s), state={session:null,user:null,family:null,swimmers:[],swimmer:null,grants:[],members:[],lists:[],swims:[],goals:[],meets:[],meetEvents:[],kidLinks:[],kidDevices:[],pairingReady:false,kidLinkError:false,messages:[],messageError:'',messageRaceId:null,messageDrafts:{},messageSending:false,tab:'home'};
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>{n=Number(n);return `${Math.floor(n/60)?Math.floor(n/60)+':':''}${(n%60).toFixed(2).padStart(Math.floor(n/60)?5:1,'0')}`};
 const parseTime=t=>{let s=String(t).trim().split(':');let n=s.length===2?Number(s[0])*60+Number(s[1]):Number(t);return Number.isFinite(n)&&n>0?n:null};
@@ -29,6 +29,7 @@ async function authenticate(email,password,signup=false){
     let s=await request(path,{method:'POST',body:{email,password,...(signup?{data:{portal_role:state.loginMode==='family'?'family':'parent'}}:{})},token:cfg.supabaseKey});
     if(!s.access_token){message.textContent='Check your email to confirm the account, then sign in.';return}
     saveSession({...s,expires_at:Math.floor(Date.now()/1000)+s.expires_in});
+    state.tab='home';
     await boot();
   }finally{submit.disabled=false;signupButton.disabled=false}
 }
