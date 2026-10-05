@@ -106,3 +106,44 @@ Tapping a completed meet event scrolls to its race reveal and replays its visito
 ## v1.7.2 — Meet selector placement
 
 My meet selector now sits below Family cheers and immediately above My progress. The selected meet title and events remain at the top of the bubble. No database changes.
+
+## v1.8.0 — Kid-device pairing
+
+Parent email/password login plus kid QR/code entry, remembered restricted device sessions, parent device list and disconnect. See PAIRING_SETUP.md for required database migration, Anonymous Sign-Ins setting and setup/testing. Shared-phone admin lock is not included yet; parent previews remain parent sessions. No deployment or database mutation performed by this package.
+
+Validation for v1.8.0: JavaScript syntax passed; DOM tests with mocked API responses passed parent QR/code display, guest code redemption, remembered kid navigation, no admin controls and no editing. SQL/PLpgSQL parsing passed. Live database transactions/RLS/session refresh/revocation and visual phone layout are not verified. Browser executable download failed in this environment.
+
+## v1.9.0 — Family portal
+
+Family sign-in option uses email/password. Invite email from parent Family access; family members sign up then sign in to accept invitation. Assign View only for each swimmer they may follow; No access hides that swimmer. Nonowner adult members open in the Family portal with no admin navigation, an assigned-swimmer picker, meets, animated results, progress and race messages. Linked kids continue to use their own kid page and automatic reply identity. Owners can open Family portal to send as parent, then Back to menu. Family portal shows no kid customization settings. Messages are linked to completed races; before result entry the pending-race message notice remains.
+
+Run family_portal_migration.sql to allow only the owner to see member emails while assigning access. Existing swimmer/message RLS rules remain authoritative. Default View only grants do not permit editing swim data. Previously granted Can edit permissions are not silently removed; change those to View only if appropriate. Replace app.js, index.html and style.css; retain config.js, animations.js, qrcode.min.js. Previous migrations remain prerequisites for their features. No live changes or deployment performed here.
+
+
+## v1.10.0 — Family signup without email invitations
+Run family_signup_migration.sql after family_portal_migration.sql in the same Supabase project. Keep your config.js.
+Parent: Family access → Create family code. Share this code with relatives. Replacing it invalidates the previous code for new requests.
+Relative: Main page → Family → Create account, confirm email, sign in. Enter name and family code, then Request access.
+Parent: Family access → Access requests → choose swimmers → Approve selected swimmers (view access), or Decline. Change later in existing member access selectors.
+Relative: Click Check approval to open assigned swimmers. Requests grant no membership or swimmer access until approved. Existing invitations remain supported.
+SQL uses owner checks, row-level security, confirmed adult accounts, and transactional approval. Syntax and mocked UI regressions checked; live Supabase execution and email flow must be verified after installation.
+Set Supabase Authentication URL Configuration Site URL and allowed redirect URL to https://sfisher1975.github.io/Swim_With_Me/. Signup now explicitly requests the current app URL.
+
+
+## v1.11.0 — Clear role-based login
+Welcome screen offers Parent, Family & friends, and Swimmer. Parent/family entry separates Sign in and Create account. Family signup collects name and code and persists them with the account; after confirmed sign-in the app submits the access request automatically. Existing family accounts can still enter their code after login. Parents still approve selected swimmers. Confirmed-email callbacks now load the session and show the appropriate page. Password reset and kid device QR links remain supported. The camera app scans QR codes; the web page accepts pairing codes.
+Remembered roles open their entry screen on return; Back returns to all roles. Valid sessions reopen the app. Overview opens first for parents and Kid view remains last. Family access is renamed People & access.
+Replace index.html, app.js, and style.css, keeping config.js. No new SQL is required if family_signup_migration.sql and prior migrations are installed. UI/auth interactions checked using mock APIs; live email and database permission flow still needs installation testing.
+
+
+## v1.12.0 — Readable member access and removal
+Replace index.html, app.js, and style.css; retain config.js. Run family_member_removal_migration.sql in the existing Swim_With_Me database after the prior signup and device migrations. Installing it removes no data.
+People & access now shows full-width member cards, readable names/emails, stacked mobile permission rows, and collapsed swimmer-account settings. Existing view/edit permission values remain unchanged. The family owner is displayed without removal or child-link controls.
+Remove member requires confirmation and a parent-only database function. The transaction revokes that family’s swimmer grants, membership, child links, and connected-device access, declines join requests, and clears outstanding matching invitations so sign-in does not silently rejoin. It preserves the Auth account, swims, meets, goals, prior messages, and other families’ access. Rejoining requires a fresh request and approval. Already displayed or downloaded content cannot be erased remotely.
+Mock UI checks passed for card controls, permission values, owner protection, cancellation and parent guards; SQL and PL/pgSQL syntax parsed. Live database removal still needs testing after installation.
+
+
+## v1.12.1 — Remove all member-linked data for this family
+This supersedes the v1.12.0 removal behavior. Rerun family_member_removal_migration.sql; installing it deletes nothing. Replace index.html and app.js, keeping config.js.
+Remove member permanently deletes their race messages and replies in this family, membership, swimmer grants, linked child/device records, redeemed pairing-code records, requests and matching outstanding invitations. It clears a saved signup code only when it matches this family to prevent automatic re-request. Auth account and name/email remain, and other families’ access/messages remain. Swimmers, meets, times, goals and other authors’ messages stay intact. Previously removed members are not automatically cleaned retroactively. Historical imported cheers stored as meet notes have no authenticated author ID and cannot safely be matched to an account; those notes remain. Previously downloaded/displayed content cannot be remotely erased.
+The UI confirmation explicitly describes permanent message deletion. Syntax and mocked interaction checks performed; live database behavior still needs verification after installation.
