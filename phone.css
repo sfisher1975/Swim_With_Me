@@ -1,0 +1,88 @@
+/* Swim With Me — phone-first design layer (v1.15.0). Loads after style.css; no logic changes. */
+:root{
+  --primary:#0a5c7a;--primary-2:#0e7f95;--accent:#ff7a59;--ink:#12303d;--muted:#5d7783;
+  --paper:#eef5f7;--line:#dbe8ec;--white:#fff;--aqua:#7fe0e8;
+  --r-lg:22px;--r-md:16px;--r-sm:12px;
+  --shadow:0 1px 2px #0b3a4912,0 8px 24px #0b3a4912;
+  --safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
+  --nav-h:68px;
+}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{background:var(--paper);font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em;overscroll-behavior-y:none}
+input,select,textarea{font-size:16px;border-radius:var(--r-sm);border:1.5px solid #cfe0e5;padding:12px 13px;background:#fbfdfd;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--primary-2);box-shadow:0 0 0 4px #0e7f9522}
+button{border-radius:var(--r-sm);min-height:46px;font-weight:650;transition:transform .08s,filter .15s}
+button:active{transform:scale(.97)}
+.primary{background:linear-gradient(135deg,var(--primary),var(--primary-2));border:0;box-shadow:0 6px 16px #0a5c7a40}
+.danger{color:#c0392b}
+.quiet{min-height:40px}
+
+/* Header: slim, translucent, respects notch */
+header{padding:calc(10px + var(--safe-t)) 14px 10px;background:#ffffffd9;backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px);border-bottom:1px solid #dbe8ecb0}
+.mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-2));box-shadow:0 4px 12px #0a5c7a30}
+.brand strong{font-size:17px;letter-spacing:-.02em}
+.version{display:none}
+#swimmerSelect{width:auto;max-width:150px;min-height:38px;padding:6px 10px;font-weight:700;border-radius:99px;background:#e6f3f5;border:0;color:var(--primary)}
+#logout{font-size:13px;padding:6px 8px}
+
+main{padding:14px 14px calc(var(--nav-h) + var(--safe-b) + 28px);max-width:720px}
+
+/* Bottom tab bar with icons */
+#tabs{position:fixed;left:10px;right:10px;bottom:calc(8px + var(--safe-b));z-index:20;display:flex;gap:2px;padding:6px;margin:0;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;background:#ffffffe8;backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);border:1px solid #ffffff;border-radius:26px;box-shadow:0 10px 34px #0b3a4930,0 1px 0 #fff inset;max-width:700px;margin-inline:auto}
+#tabs::-webkit-scrollbar{display:none}
+#tabs button{flex:1 0 66px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 4px 6px;min-height:54px;border:0;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:0;color:#6d8590;background:transparent}
+#tabs button::before{font-size:21px;line-height:1;filter:grayscale(1) opacity(.7);transition:transform .2s,filter .2s}
+#tabs button.active{color:var(--primary);background:#e1f2f5}
+#tabs button.active::before{filter:none;transform:translateY(-1px) scale(1.12)}
+#tabs [data-tab=home]::before{content:"🏠"}#tabs [data-tab=meets]::before{content:"🏁"}
+#tabs [data-tab=results]::before{content:"⏱️"}#tabs [data-tab=progress]::before{content:"📈"}
+#tabs [data-tab=goals]::before{content:"🎯"}#tabs [data-tab=family]::before{content:"👥"}
+#tabs [data-tab=portal]::before{content:"💙"}#tabs [data-tab=kid]::before{content:"🏊"}
+
+/* Cards */
+.card{border:0;border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2{font-size:20px;letter-spacing:-.025em}.card h3{font-size:16px}
+.hero{background:radial-gradient(circle at 85% 0,#7fe0e855,transparent 50%),linear-gradient(135deg,#08485f,var(--primary-2));border-radius:28px;padding:24px;box-shadow:0 14px 34px #0a5c7a40}
+.hero h1,.hero h2{letter-spacing:-.035em}
+.hero .primary{background:#fff;color:var(--primary);box-shadow:none}
+.eyebrow{color:var(--accent);letter-spacing:.14em}
+.metric{font-size:34px;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.grid{gap:12px}
+.grid .card{margin:0}
+.item{border:0;background:#f3f9fa;border-radius:var(--r-md);padding:14px}
+.item strong{letter-spacing:-.01em}
+.pill{background:#e1f2f5;padding:5px 11px}
+.bar{height:10px;background:#e1edf0}.bar span{background:linear-gradient(90deg,var(--accent),#ffb46b);border-radius:99px}
+.empty{background:transparent}
+#notice:not(:empty){border-radius:var(--r-md);background:#fff;box-shadow:var(--shadow);border-left:4px solid var(--accent);font-size:14px}
+
+/* Login / welcome */
+.auth{align-items:start;padding:0;min-height:100vh;background:radial-gradient(circle at 20% -5%,#7fe0e866,transparent 45%),radial-gradient(circle at 100% 20%,#ff7a5922,transparent 40%),linear-gradient(180deg,#0a5c7a 0,#0a5c7a 230px,var(--paper) 230px)}
+.authCard{max-width:460px;margin:calc(26px + var(--safe-t)) auto 0;border:0;border-radius:30px;padding:26px 22px 30px;box-shadow:0 22px 60px #0b3a4933}
+.login-hero{text-align:center;margin-bottom:6px}
+.login-hero .mark.big{width:72px;height:72px;border-radius:24px;margin:0 auto 14px;font-size:40px}
+.authCard h1{font-size:32px;letter-spacing:-.04em}
+.authCard h2{font-size:16px;text-align:center;color:var(--muted);font-weight:650;margin:22px 0 12px}
+.login-modes{display:grid;gap:10px}
+.login-modes button{display:grid;grid-template-columns:52px 1fr 14px;gap:12px;align-items:center;text-align:left;padding:14px;border:0;background:#f3f9fa;border-radius:20px;min-height:76px}
+.login-modes button strong{display:block;font-size:17px}
+.login-modes button small{color:var(--muted);font-weight:500;line-height:1.3}
+.login-modes .role-icon{width:52px;height:52px;border-radius:17px;display:grid;place-items:center;font-size:26px;background:#fff;box-shadow:0 2px 8px #0b3a4918}
+.login-modes button:nth-child(1) .role-icon{background:#e1f2f5}.login-modes button:nth-child(2) .role-icon{background:#ffe8e0}.login-modes button:nth-child(3) .role-icon{background:#e9f7d9}
+#authEntry{display:grid;gap:10px;margin-top:10px}
+
+/* Forms */
+.formgrid{gap:14px}
+label{font-size:12.5px;letter-spacing:.01em;text-transform:none}
+details summary{min-height:44px;display:flex;align-items:center;font-weight:700}
+
+/* Kid / family bubble: keep its look, tune for phones */
+body.kid-mode main{padding:calc(12px + var(--safe-t)) 12px calc(30px + var(--safe-b))}
+.kid-mode .race-reveal,.bubble-only .race-reveal{border-radius:34px}
+.bubble-section summary{font-size:16px}
+.save-hero,.card-save{min-height:52px;border-radius:18px}
+.sheet-card{border-radius:28px 28px 0 0}
+
+/* Larger screens: keep the app centered, tab bar as floating dock */
+@media(min-width:760px){#tabs{left:50%;right:auto;transform:translateX(-50%);width:min(700px,calc(100vw - 20px))}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
