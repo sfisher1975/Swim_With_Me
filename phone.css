@@ -305,3 +305,8 @@ header .brand>div:last-child{min-width:0}
   .pa-event-actions button{min-height:40px;padding:8px 11px}
   .pa-event-actions .danger{color:#9f2f2f;background:#fff5f5;border-color:#efcaca}
 }
+
+/* v1.20.3 — Family Settings modal layering fix */
+#paSheet{position:relative;z-index:120}
+#paSheet .pa-backdrop{z-index:120}
+#paSheet .pa-sheet{z-index:121}
