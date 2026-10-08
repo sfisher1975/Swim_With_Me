@@ -306,7 +306,8 @@ header .brand>div:last-child{min-width:0}
   .pa-event-actions .danger{color:#9f2f2f;background:#fff5f5;border-color:#efcaca}
 }
 
-/* v1.20.3 — Family Settings modal layering fix */
-#paSheet{position:relative;z-index:120}
-#paSheet .pa-backdrop{z-index:120}
-#paSheet .pa-sheet{z-index:121}
+/* v1.20.4 — Family Settings modal is its own top-level fixed layer */
+#paSheet:not(:empty){position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;isolation:isolate;pointer-events:none}
+#paSheet .pa-backdrop{position:absolute;inset:0;z-index:0;pointer-events:auto}
+#paSheet .pa-sheet{position:relative;left:auto;right:auto;bottom:auto;z-index:1;width:100%;max-height:88dvh;pointer-events:auto;margin:0}
+
