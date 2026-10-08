@@ -1,3 +1,18 @@
+# v1.22.0
+- Kid view rebuilt around three moments: Meet (during the meet), result reveal (after a swim), History (look back).
+- Meet tab: up-next card with time to beat and goal, coming-up list, done list with change and badges.
+- 'Your time is in' full-screen reveal for kid devices when a parent enters a result, using the existing race animation.
+- Playful celebrations: faster swim, new personal best, goal reached, B/BB/A/AA time earned (confetti, stars, bounce, vibration).
+- History tab: progress chart and past meets. Me tab: colors and animations.
+- Family Portal unchanged.
+
+# v1.21.0
+- Number-keypad time entry (10436 becomes 1:04.36) and quick-pick event chips in Add result.
+- New Home screen: next meet, latest swim with change, goal progress.
+- Goals shown as cards with progress bars and B/BB/A/AA standards, with Event picker.
+- Tap a result to open a detail sheet with history and mini chart; Edit lives inside.
+- People & Access and Family Portal unchanged.
+
 # v1.19.3
 - People & Access now opens with every accordion section collapsed.
 - Family Portal rebuilt as a simple phone-first results feed.
