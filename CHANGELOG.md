@@ -1,9 +1,9 @@
-# v1.22.9
-- Preserved the exact uploaded site design and phone UI.
-- Email invitations now open a streamlined family-member account/sign-in flow without asking for a family code.
-- Family codes are only entered after an account exists, to request access to a family.
-- Invitation acceptance is idempotent: existing family members no longer trigger the family_members_pkey duplicate-key error.
-- Invite emails now return the recipient to the family-member flow with their email prefilled.
+## v1.22.10 — Invitation login flow fix
+- Email invitations now carry the invitation through sign-in/account creation and bypass the family-code step.
+- New invited accounts automatically join the invited family and continue to Family Portal.
+- Accepting an invitation is idempotent: an existing family membership no longer causes a duplicate-key error.
+- Family codes remain for existing accounts manually requesting access.
+- Visual design and Kid View are unchanged from the user-provided v1.22.7 site baseline.
 
 ## v1.22.4 — Race card share button fix
 - Fixed the Kid View result reveal Share button: the reveal lives outside `#app`, so its click was never reaching the app action handler.
