@@ -188,22 +188,18 @@ async function makeRaceCardBlob(){
  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('Unable to create race card.');
  return blob;
 }
-let raceCardShareCache=null,raceCardShareBuild=null;
-function raceCardShareKey(s){return s?[s.id,kidTheme(),readReaction(s)||''].join('|'):''}
-function primeRaceCardShare(s=selectedRace()){
- if(!s)return Promise.resolve(null);const key=raceCardShareKey(s);
- if(raceCardShareCache?.key===key)return Promise.resolve(raceCardShareCache.blob);
- if(raceCardShareBuild?.key===key)return raceCardShareBuild.promise;
- const promise=makeRaceCardBlob().then(blob=>{raceCardShareCache={key,blob};return blob}).catch(()=>null).finally(()=>{if(raceCardShareBuild?.key===key)raceCardShareBuild=null});
- raceCardShareBuild={key,promise};return promise;
+let preparedRaceCard=null;
+async function prepareRaceCard(){
+ const s=selectedRace();if(!s){preparedRaceCard=null;return null}const raceId=s.id;
+ try{const blob=await makeRaceCardBlob();if(selectedRace()?.id===raceId)preparedRaceCard={raceId,blob};return blob}catch(err){preparedRaceCard=null;throw err}
 }
 async function shareRaceCard(){
- const s=selectedRace();if(!s)return;const key=raceCardShareKey(s),blob=raceCardShareCache?.key===key?raceCardShareCache.blob:null;
- if(!blob){primeRaceCardShare(s);notify('Getting your race card ready — tap Share my race card again.');return}
+ const s=selectedRace();if(!s)return;let blob=preparedRaceCard?.raceId===s.id?preparedRaceCard.blob:null;
+ if(!blob){notify('Race card is still getting ready. Try Share again in a moment.');prepareRaceCard().catch(()=>{});return}
  const file=new File([blob],'Swim-With-Me-Race.png',{type:'image/png'}),first=(state.swimmer?.name||'My').split(' ')[0],shareData={title:first+'\'s Swim With Me race card',text:first+' just swam '+s.event+' ('+s.course+') in '+fmt(s.seconds)+'!',files:[file]};
- if(!navigator.share){notify('This browser does not support the phone share menu. Open Swim With Me in Safari or Chrome and try again.');return}
- if(navigator.canShare&&!navigator.canShare({files:[file]})){notify('This browser cannot share the race card image. Open Swim With Me in Safari or Chrome and try again.');return}
- try{await navigator.share(shareData)}catch(err){if(err&&err.name==='AbortError')return;notify('The share menu could not open. Please try again.')}
+ if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share(shareData);return}catch(err){if(err&&err.name==='AbortError')return;notify('Could not open sharing. Please try again.');return}}
+ if(navigator.share){try{await navigator.share({title:shareData.title,text:shareData.text});return}catch(err){if(err&&err.name==='AbortError')return}}
+ notify('Sharing is not supported by this browser. Open Swim With Me in Safari or Chrome and try again.');
 }
 let kidRefreshBusy=false;
 setInterval(async()=>{if(kidRefreshBusy||document.hidden||!['kid','portal'].includes(state.tab)||!state.session||!state.swimmer)return;kidRefreshBusy=true;try{if(await ensureSession()){if(state.user.is_anonymous){await loadRoot();if(!state.swimmer){showAuth();setLoginMode('swimmer');$('#authMessage').textContent='Your parent disconnected this device. Ask for a new code.'}}else if(state.tab==='portal'){const openPortalEvent=state.portalEventId;await loadRoot();if(openPortalEvent&&state.meetEvents.some(e=>e.id===openPortalEvent)){state.portalEventId=openPortalEvent;await loadPortalEventMessages(openPortalEvent);render()}}else await loadSwimmer();$('#notice').textContent=''}else showAuth()}catch{ $('#notice').textContent='Could not refresh. Showing your last loaded results. We’ll try again automatically.'}finally{kidRefreshBusy=false}},15000);
@@ -345,13 +341,13 @@ function openKidReveal(s){closeKidReveal();const e=state.meetEvents.find(x=>x.sw
  const chips=(a.pb?'<span class="kb pb">★ PB</span>':'')+(a.goal?'<span class="kb goal">🎯 Goal</span>':'')+a.stds.map(x=>`<span class="kb std">🏅 ${x}</span>`).join(''),goalLine=a.target?(Number(s.seconds)<=a.target?`Goal ${fmt(a.target)} ✓`:`Goal ${fmt(a.target)} · ${(Number(s.seconds)-a.target).toFixed(2)} to go`):'',m=document.createElement('div');m.id='kidReveal';m.className='tier-'+a.tier;m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label','Your result');
  m.style.setProperty('--kc1',kidThemes[kidTheme()].colors[0]);m.style.setProperty('--kc2',kidThemes[kidTheme()].colors[1]);
  m.innerHTML=`<div class="kr-top"><small>YOUR TIME IS IN</small><h2>${esc(s.event)} · ${esc(s.course)}</h2></div>${raceAnimationMarkup(s,f)}<div class="kr-celebrate" hidden><div class="kr-emoji" aria-hidden="true">${emoji}</div><div class="kr-title">${esc(title)}</div><p>${esc(sub)}</p>${chips?`<div class="kv-badges">${chips}</div>`:''}${goalLine?`<p class="kr-goal">${esc(goalLine)}</p>`:''}</div><div class="kr-actions"><button type="button" class="kr-primary" data-kr-close>Back to my meet</button><button type="button" class="kr-ghost" data-action="shareCard">Share my race card</button></div>`;
- document.body.appendChild(m);document.body.classList.add('kr-open');
- primeRaceCardShare(s);
+ document.body.appendChild(m);document.body.classList.add('kr-open');preparedRaceCard=null;prepareRaceCard().catch(()=>{});
  const stage=m.querySelector('[data-reveal-stage]'),celebrate=()=>{if(m.dataset.done)return;m.dataset.done='1';m.querySelector('.kr-celebrate').hidden=false;if(n)krConfetti(m,n,stars);if(buzz&&navigator.vibrate)try{navigator.vibrate(buzz)}catch{}};
  if(stage)new MutationObserver(()=>{if(stage.classList.contains('landed'))celebrate()}).observe(stage,{attributes:true,attributeFilter:['class']});
  try{startRaceReveal(true)}catch{}
  if(!stage||stage.classList.contains('landed'))celebrate();setTimeout(celebrate,7500)}
 document.addEventListener('click',async e=>{
+ const share=e.target.closest('[data-action="shareCard"]');if(share&&share.closest('#kidReveal')){e.preventDefault();try{await shareRaceCard()}catch(err){notify(err.message||'Could not share race card.')}return}
  const t=e.target.closest('[data-kidtab]');if(t){window.__kidTab=t.dataset.kidtab;render();window.scrollTo(0,0);return}
  const r=e.target.closest('[data-kidreveal]');if(r){const s=state.swims.find(x=>x.id===r.dataset.kidreveal);if(!s)return;state.kidEventId=r.dataset.event;try{await loadRaceMessages()}catch{}window.__kidTab='meet';render();openKidReveal(s);return}
  if(e.target.closest('[data-kr-close]')){closeKidReveal();setTimeout(krCheck,350)}

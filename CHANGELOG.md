@@ -1,8 +1,8 @@
-## v1.22.3 — Race card share reliability
-- Built directly from the latest user-provided v1.22.2 project; Kid View layout and styling are unchanged.
-- Prepares the race-card PNG while the result reveal is open so the native phone share sheet can be called directly from the Share button tap.
-- Keeps one Share my race card button; no separate save/download control.
-- Adds clear feedback when the current browser cannot use native image sharing.
+## v1.22.4 — Race card share button fix
+- Fixed the Kid View result reveal Share button: the reveal lives outside `#app`, so its click was never reaching the app action handler.
+- Added a reveal-level Share handler and prepares the PNG while the result reveal is open, before the kid taps Share.
+- Keeps one **Share my race card** button and the current v1.22.2 Kid View design unchanged.
+- No database changes.
 
 ## v1.22.2 — Kid race card sharing
 - Replaced the separate race-card save action with one **Share my race card** action.
