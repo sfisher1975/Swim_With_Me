@@ -1,9 +1,10 @@
-## v1.22.10 — Invitation login flow fix
-- Email invitations now carry the invitation through sign-in/account creation and bypass the family-code step.
-- New invited accounts automatically join the invited family and continue to Family Portal.
-- Accepting an invitation is idempotent: an existing family membership no longer causes a duplicate-key error.
-- Family codes remain for existing accounts manually requesting access.
-- Visual design and Kid View are unchanged from the user-provided v1.22.7 site baseline.
+## v1.22.11 — Invited family login fix
+- Validates the saved Supabase session against the current Auth user so deleted/recreated test accounts cannot keep using a stale JWT.
+- Email-invited users no longer enter a family code during account creation.
+- Invite acceptance is idempotent: an existing family membership is reused instead of inserted twice.
+- After an email invitation is accepted, the user is routed to the Family Portal.
+- Family code remains available only to a signed-in user who is not already connected through an invitation.
+- Built from the user-provided Swim_With_Me-main(3).zip; visual/Kid View files were otherwise preserved.
 
 ## v1.22.4 — Race card share button fix
 - Fixed the Kid View result reveal Share button: the reveal lives outside `#app`, so its click was never reaching the app action handler.
