@@ -1,3 +1,9 @@
+## v1.22.2 — Kid race card sharing
+- Replaced the separate race-card save action with one **Share my race card** action.
+- Uses the phone/browser native share sheet with the generated PNG attached, so installed Messages, Mail, social apps, Save to Files/photos, and other share targets can appear in one place.
+- If image sharing is unavailable in the browser, falls back to downloading the PNG instead of losing the card.
+- No database changes.
+
 # v1.22.1
 - Kid view: Family cheers now use dark text on light cards (was white on light).
 - Previous-swim comparison now matches events the same way Family Portal does (50 Free = 50 Freestyle), so drop/add times show on reveals, the Done list, and Results.
