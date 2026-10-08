@@ -188,11 +188,16 @@ async function makeRaceCardBlob(){
  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('Unable to create race card.');
  return blob;
 }
-async function shareRaceCard(){
- const s=selectedRace();if(!s)return;const blob=await makeRaceCardBlob(),file=new File([blob],'Swim-With-Me-Race.png',{type:'image/png'}),first=(state.swimmer?.name||'My').split(' ')[0],shareData={title:first+'\'s Swim With Me race card',text:first+' just swam '+s.event+' ('+s.course+') in '+fmt(s.seconds)+'!',files:[file]};
- if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share(shareData);return}catch(err){if(err&&err.name==='AbortError')return;}}
- const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='Swim-With-Me-Race.png';link.click();setTimeout(()=>URL.revokeObjectURL(url),10000);notify('Sharing is not available here, so the race card was saved instead.');
-}
+let raceCardCache=null;
+function raceCardKey(s){return [s.id,s.seconds,kidTheme(),readReaction(s)||'',raceFacts(s).previous?.seconds||''].join('|')}
+async function prepareRaceCard(){const s=selectedRace();if(!s)return null;const key=raceCardKey(s);if(raceCardCache&&raceCardCache.key===key)return raceCardCache;const blob=await makeRaceCardBlob();if(!blob)return null;const file=new File([blob],'Swim-With-Me-Race.png',{type:'image/png'}),first=(state.swimmer?.name||'My').split(' ')[0],data={title:first+'\'s Swim With Me race card',text:first+' just swam '+s.event+' ('+s.course+') in '+fmt(s.seconds)+'!',files:[file]};raceCardCache={key,blob,file,data};return raceCardCache}
+function closeRaceCardSheet(){const o=document.getElementById('raceCardSheet');if(o){o.querySelectorAll('img').forEach(i=>{try{URL.revokeObjectURL(i.src)}catch{}});o.remove()}}
+function showRaceCardSheet(c){closeRaceCardSheet();const url=URL.createObjectURL(c.blob),can=!!(navigator.share&&(!navigator.canShare||navigator.canShare({files:[c.file]}))),m=document.createElement('div');m.id='raceCardSheet';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.innerHTML=`<div class="rc-panel"><div class="rc-grab"></div><h2>Your race card</h2><img src="${url}" alt="Your race card"><p>Press and hold the picture to save or share it.</p><div class="rc-actions">${can?'<button type="button" class="rc-primary" data-rc-share>Share</button>':''}<a class="rc-save" href="${url}" download="Swim-With-Me-Race.png">Save picture</a><button type="button" data-rc-close>Close</button></div></div>`;m.addEventListener('click',e=>{if(e.target===m||e.target.closest('[data-rc-close]')){closeRaceCardSheet();return}if(e.target.closest('[data-rc-share]'))navigator.share(c.data).catch(()=>{})});document.body.appendChild(m)}
+function shareRaceCard(){const s=selectedRace();if(!s)return;const c=raceCardCache&&raceCardCache.key===raceCardKey(s)?raceCardCache:null;
+ if(!c){notify('Getting your race card ready…');prepareRaceCard().then(x=>{if(x)showRaceCardSheet(x)}).catch(err=>notify('Could not make the race card: '+(err&&err.message||err)));return}
+ if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[c.file]}))){navigator.share(c.data).catch(err=>{if(err&&err.name==='AbortError')return;showRaceCardSheet(c)});return}
+ showRaceCardSheet(c)}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRaceCardSheet()});
 let kidRefreshBusy=false;
 setInterval(async()=>{if(kidRefreshBusy||document.hidden||!['kid','portal'].includes(state.tab)||!state.session||!state.swimmer)return;kidRefreshBusy=true;try{if(await ensureSession()){if(state.user.is_anonymous){await loadRoot();if(!state.swimmer){showAuth();setLoginMode('swimmer');$('#authMessage').textContent='Your parent disconnected this device. Ask for a new code.'}}else if(state.tab==='portal'){const openPortalEvent=state.portalEventId;await loadRoot();if(openPortalEvent&&state.meetEvents.some(e=>e.id===openPortalEvent)){state.portalEventId=openPortalEvent;await loadPortalEventMessages(openPortalEvent);render()}}else await loadSwimmer();$('#notice').textContent=''}else showAuth()}catch{ $('#notice').textContent='Could not refresh. Showing your last loaded results. We’ll try again automatically.'}finally{kidRefreshBusy=false}},15000);
 
@@ -336,7 +341,7 @@ function openKidReveal(s){closeKidReveal();const e=state.meetEvents.find(x=>x.sw
  document.body.appendChild(m);document.body.classList.add('kr-open');
  const stage=m.querySelector('[data-reveal-stage]'),celebrate=()=>{if(m.dataset.done)return;m.dataset.done='1';m.querySelector('.kr-celebrate').hidden=false;if(n)krConfetti(m,n,stars);if(buzz&&navigator.vibrate)try{navigator.vibrate(buzz)}catch{}};
  if(stage)new MutationObserver(()=>{if(stage.classList.contains('landed'))celebrate()}).observe(stage,{attributes:true,attributeFilter:['class']});
- try{startRaceReveal(true)}catch{}
+ try{startRaceReveal(true)}catch{}prepareRaceCard().catch(()=>{});
  if(!stage||stage.classList.contains('landed'))celebrate();setTimeout(celebrate,7500)}
 document.addEventListener('click',async e=>{
  const t=e.target.closest('[data-kidtab]');if(t){window.__kidTab=t.dataset.kidtab;render();window.scrollTo(0,0);return}

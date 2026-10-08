@@ -477,3 +477,14 @@ body.kr-open{overflow:hidden}
 .kid-v2 .race-conversation textarea,.kid-v2 .race-conversation input{background:#fbfdfd;color:var(--ink);border:1.5px solid #cfe0e5}
 .kid-v2 .race-conversation small{color:#5d5069}
 .kid-v2 .send-message{background:linear-gradient(135deg,var(--kc1),var(--kc2));color:#fff;border:0;min-height:48px;border-radius:16px;font-weight:800}
+
+/* v1.22.3: race card preview / save sheet */
+#raceCardSheet{position:fixed;inset:0;z-index:80;background:#0b1f2acc;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+#raceCardSheet .rc-panel{width:100%;max-width:520px;max-height:94vh;max-height:94dvh;overflow:auto;background:#fff;color:var(--ink);border-radius:28px 28px 0 0;padding:10px 18px calc(18px + var(--safe-b));text-align:center;animation:rise .28s cubic-bezier(.2,.9,.3,1)}
+#raceCardSheet .rc-grab{width:42px;height:5px;border-radius:9px;background:#cfdde2;margin:2px auto 12px}
+#raceCardSheet h2{margin:0 0 10px;font-size:22px;letter-spacing:-.03em}
+#raceCardSheet img{width:100%;max-width:340px;height:auto;border-radius:18px;box-shadow:0 10px 30px #0b1f2a40;-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+#raceCardSheet p{margin:10px 0 0;color:var(--muted);font-size:14px;font-weight:600}
+#raceCardSheet .rc-actions{display:grid;gap:8px;margin-top:14px}
+#raceCardSheet .rc-primary{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border:0;min-height:52px;border-radius:16px;font-size:16px;font-weight:800}
+#raceCardSheet .rc-save{display:grid;place-items:center;min-height:50px;border-radius:16px;background:#eef5f7;color:var(--primary);font-weight:800;text-decoration:none}
