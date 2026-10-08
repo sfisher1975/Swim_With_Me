@@ -1,7 +1,8 @@
-## v1.22.3 — Race card sharing fix
-- The race card picture is now prepared ahead of time, so tapping Share opens the phone's share sheet immediately (browsers block sharing if the picture is built after the tap).
-- If sharing is blocked or unsupported, a Your race card sheet shows the picture with Share, Save picture, and press-and-hold options instead of silently failing.
-- No database changes.
+## v1.22.3 — Race card share reliability
+- Built directly from the latest user-provided v1.22.2 project; Kid View layout and styling are unchanged.
+- Prepares the race-card PNG while the result reveal is open so the native phone share sheet can be called directly from the Share button tap.
+- Keeps one Share my race card button; no separate save/download control.
+- Adds clear feedback when the current browser cannot use native image sharing.
 
 ## v1.22.2 — Kid race card sharing
 - Replaced the separate race-card save action with one **Share my race card** action.
