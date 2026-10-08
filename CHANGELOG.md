@@ -1,3 +1,11 @@
+## v1.22.8 — Streamlined family joining
+- Email invitations now open a dedicated Family & Friends entry flow with the invited email prefilled.
+- New invitees create an account without entering a family code; their matching email invitation connects them automatically.
+- Existing users who open an email invitation simply sign in and are connected automatically.
+- Family codes are now reserved for people who already have a Swim With Me account and want to request access to another family.
+- Updated family-code wording so owners know codes are for existing accounts.
+- Kid View, Race Card sharing, meet/results/progress features, and EmailJS delivery behavior are otherwise unchanged.
+
 ## v1.22.4 — Race card share button fix
 - Fixed the Kid View result reveal Share button: the reveal lives outside `#app`, so its click was never reaching the app action handler.
 - Added a reveal-level Share handler and prepares the PNG while the result reveal is open, before the kid taps Share.
