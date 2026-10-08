@@ -274,3 +274,27 @@ header .brand>div:last-child{min-width:0}
 
 /* v1.19.4 — Family Portal event cards, pending cheers, and next goal */
 .portal-pending{flex:none;background:#eef3f5;color:#5e7079;border-radius:99px;padding:7px 10px;font-size:11px;font-weight:900;letter-spacing:.05em}.portal-goal{margin-top:14px;padding:11px 13px;border-radius:14px;background:#f2f8ff;border:1px solid #dbeaff;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#31576b}.portal-goal span{font-size:13px;font-weight:800}.portal-goal strong{font-size:18px;color:#0a5c7a;font-variant-numeric:tabular-nums}.portal-goal.achieved{background:#eaf9ef;border-color:#cdeed8}.portal-goal.achieved span,.portal-goal.achieved strong{color:#177a3c}.portal-result .portal-cheer-panel{margin-top:14px}
+
+
+/* v1.19.5 — Family Portal cheer readability + persistent open thread */
+.portal-cheer-panel .family-message{background:#f5f0fb;border:1px solid #eadff6;color:#29143f}
+.portal-cheer-panel .family-message.mine{background:#f3ecfb;margin-left:0}
+.portal-cheer-panel .message-author strong{color:#32104d}
+.portal-cheer-panel .message-author time{color:#806d91}
+.portal-cheer-panel .family-message p{color:#2f2040;font-weight:600}
+.portal-cheer-panel .message-empty,.portal-cheer-panel .message-error{color:#5d5069}
+.portal-cheer-panel .race-conversation label,.portal-cheer-panel .race-conversation small{color:#40545e}
+
+
+/* v1.19.6 — Family Portal contrast cleanup */
+.family-portal-simple .portal-hero-top>span{opacity:1;color:#fff}
+.family-portal-simple .portal-swimmer-row p{color:#fff;font-weight:650}
+.family-portal-simple .portal-swimmer-row label,.family-portal-simple .portal-meet-select{color:#fff;opacity:1;font-weight:900;letter-spacing:.025em}
+.family-portal-simple .portal-swimmer-row select,.family-portal-simple .portal-meet-select select{background:#fff;color:#12384b;border-color:#d9edf7}
+.family-portal-simple .portal-event-name small{color:#526b77;font-weight:650}
+.family-portal-simple .portal-compare>span{color:#526b77}
+.family-portal-simple .portal-compare .even{color:#526b77}
+.family-portal-simple .portal-empty p{color:#526b77}
+.family-portal-simple .portal-goal span{color:#31576b}
+.family-portal-simple .portal-goal strong{color:#0a5c7a}
+.family-portal-simple .portal-signout{color:#fff;opacity:1}
