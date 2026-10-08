@@ -298,3 +298,10 @@ header .brand>div:last-child{min-width:0}
 .family-portal-simple .portal-goal span{color:#31576b}
 .family-portal-simple .portal-goal strong{color:#0a5c7a}
 .family-portal-simple .portal-signout{color:#fff;opacity:1}
+
+/* v1.19.7 — Family Settings event manager */
+@media (max-width: 760px){
+  .pa-event-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+  .pa-event-actions button{min-height:40px;padding:8px 11px}
+  .pa-event-actions .danger{color:#9f2f2f;background:#fff5f5;border-color:#efcaca}
+}
