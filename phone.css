@@ -311,3 +311,11 @@ header .brand>div:last-child{min-width:0}
 #paSheet .pa-backdrop{position:absolute;inset:0;z-index:0;pointer-events:auto}
 #paSheet .pa-sheet{position:relative;left:auto;right:auto;bottom:auto;z-index:1;width:100%;max-height:88dvh;pointer-events:auto;margin:0}
 
+
+
+/* v1.20.5 — Family Settings dialogs render at body level, outside page stacking contexts */
+#paModalRoot:not(:empty){position:fixed;inset:0;z-index:2147483000;display:flex;align-items:flex-end;isolation:isolate}
+#paModalRoot .pa-backdrop{position:absolute;inset:0;z-index:0;background:#0b1f2a99;pointer-events:auto}
+#paModalRoot .pa-sheet{position:relative!important;inset:auto!important;z-index:1;width:100%;max-width:none;max-height:88dvh;overflow:auto;margin:0;background:#fff;pointer-events:auto;padding-bottom:calc(24px + env(safe-area-inset-bottom));box-shadow:0 -12px 35px #001b2a35}
+body.pa-modal-open #dock{display:none!important}
+body.pa-modal-open{overflow:hidden}
