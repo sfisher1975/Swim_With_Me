@@ -459,3 +459,21 @@ body.kr-open{overflow:hidden}
 @keyframes krBounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-16px)}}
 @keyframes krWiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-2.5deg)}75%{transform:rotate(2.5deg)}}
 @keyframes krRise{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+
+/* v1.22.1: Family cheers readable on the light kid page */
+.kid-v2 .race-conversation{background:#fff;border:0;border-radius:26px;padding:16px;margin-top:18px;box-shadow:var(--shadow);color:var(--ink)}
+.kid-v2 .race-conversation h3{color:var(--ink);margin:0 0 12px;font-size:18px}
+.kid-v2 .message-thread{display:grid;gap:8px}
+.kid-v2 .family-message{background:#f5f0fb;border:1px solid #eadff6;color:#29143f;border-radius:18px;padding:12px 14px;margin:0}
+.kid-v2 .family-message.mine{background:#e6f3f6;border-color:#cde4ea}
+.kid-v2 .message-author{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.kid-v2 .message-author strong{color:#32104d;font-size:14px}
+.kid-v2 .message-author time{color:#806d91;font-size:12px}
+.kid-v2 .family-message p{color:#2f2040;font-weight:600;font-size:16px;line-height:1.4;margin:6px 0 0}
+.kid-v2 .message-empty,.kid-v2 .message-error,.kid-v2 .kid-preview-note{color:#5d5069;font-size:14px;font-weight:600;margin:6px 2px 0}
+.kid-v2 .message-error{color:#c0392b}
+.kid-v2 .race-conversation form{margin-top:14px;display:grid;gap:8px}
+.kid-v2 .race-conversation label{color:#32104d;font-weight:700;font-size:14px}
+.kid-v2 .race-conversation textarea,.kid-v2 .race-conversation input{background:#fbfdfd;color:var(--ink);border:1.5px solid #cfe0e5}
+.kid-v2 .race-conversation small{color:#5d5069}
+.kid-v2 .send-message{background:linear-gradient(135deg,var(--kc1),var(--kc2));color:#fff;border:0;min-height:48px;border-radius:16px;font-weight:800}

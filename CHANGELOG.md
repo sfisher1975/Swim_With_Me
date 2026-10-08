@@ -1,3 +1,7 @@
+# v1.22.1
+- Kid view: Family cheers now use dark text on light cards (was white on light).
+- Previous-swim comparison now matches events the same way Family Portal does (50 Free = 50 Freestyle), so drop/add times show on reveals, the Done list, and Results.
+
 # v1.22.0
 - Kid view rebuilt around three moments: Meet (during the meet), result reveal (after a swim), History (look back).
 - Meet tab: up-next card with time to beat and goal, coming-up list, done list with change and badges.
